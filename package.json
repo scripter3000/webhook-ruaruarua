@@ -1,0 +1,16 @@
+{
+  "name": "webhook-protector",
+  "version": "1.0.0",
+  "description": "Webhook URL protector service",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
