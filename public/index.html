@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Protector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Webhook Protector</h1>
+            <p>Protect your webhook URLs from exposure</p>
+        </header>
+
+        <div class="card">
+            <h2>Protect Your Webhook</h2>
+            <form id="protectForm">
+                <div class="input-group">
+                    <label for="webhookUrl">Enter your webhook URL:</label>
+                    <input 
+                        type="url" 
+                        id="webhookUrl" 
+                        placeholder="https://discord.com/api/webhooks/..." 
+                        required
+                    >
+                </div>
+                <button type="submit" id="protectBtn">
+                    <span id="btnText">🛡️ Protect Webhook</span>
+                    <span id="loading" class="loading hidden">⏳ Processing...</span>
+                </button>
+            </form>
+        </div>
+
+        <div id="result" class="card result-card hidden">
+            <h2>✅ Webhook Protected!</h2>
+            <div class="protected-url-container">
+                <label>Your protected URL:</label>
+                <div class="url-display">
+                    <input type="text" id="protectedUrl" readonly>
+                    <button id="copyBtn" type="button">📋 Copy</button>
+                </div>
+            </div>
+            <div class="info">
+                <h3>How to use:</h3>
+                <ul>
+                    <li>✅ Only POST requests are allowed</li>
+                    <li>✅ Original URL is encrypted and secure</li>
+                    <li>✅ Works with Discord, Slack, and other webhook services</li>
+                    <li>⚠️ Use the protected URL instead of your original webhook</li>
+                </ul>
+            </div>
+            <button id="newWebhook" type="button" class="secondary">Protect Another Webhook</button>
+        </div>
+
+        <div class="example-card card">
+            <h3>📝 Example Usage (Luau/Roblox)</h3>
+            <pre><code>local response = request({
+    Url = "YOUR_PROTECTED_URL_HERE",
+    Method = "POST",
+    Headers = {
+        ["Content-Type"] = "application/json"
+    },
+    Body = '{"content":"This is a test message."}'
+})
+print("Status:", response.StatusCode)</code></pre>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
