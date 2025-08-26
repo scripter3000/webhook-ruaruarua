@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Simple encryption using AES-256-GCM
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-32-character-secret-key-here!!'; // Should be 32 characters
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'w3bh00k-pR0t3ct0r-k3y-rU4rU4r4!';
 const ALGORITHM = 'aes-256-gcm';
 
 function encrypt(text) {
