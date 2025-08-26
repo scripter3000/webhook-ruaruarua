@@ -3,7 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 // Simple encryption using AES-256-GCM
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'w3bh00k-pR0t3ct0r-k3y-rU4rU4r4!';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // Must be set in Vercel environment variables
+
+if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
+    throw new Error('ENCRYPTION_KEY environment variable must be exactly 32 characters');
+}
 const ALGORITHM = 'aes-256-gcm';
 
 function encrypt(text) {
@@ -64,6 +68,9 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    // Set content type to JSON
+    res.setHeader('Content-Type', 'application/json');
 
     try {
         const { webhookUrl } = req.body;
