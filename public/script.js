@@ -32,7 +32,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ webhookUrl })
             });
 
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get('content-type');
+            
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                throw new Error('Server returned non-JSON response: ' + text.substring(0, 100));
+            }
 
             if (response.ok) {
                 protectedUrlInput.value = data.protectedUrl;
@@ -42,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(data.error || 'Failed to protect webhook');
             }
         } catch (error) {
+            console.error('Full error:', error);
             alert('Error: ' + error.message);
         } finally {
             // Reset button state
