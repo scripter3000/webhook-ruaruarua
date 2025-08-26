@@ -1,12 +1,12 @@
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
 
 // Same encryption setup as protect.js
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-32-character-secret-key-here!!';
-const ALGORITHM = 'aes-256-gcm';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 function decrypt(encryptedData) {
+    if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
+        throw new Error('Invalid encryption key');
+    }
     const parts = encryptedData.split(':');
     const iv = Buffer.from(parts[0], 'hex');
     const encrypted = parts[1];
@@ -16,32 +16,10 @@ function decrypt(encryptedData) {
     return decrypted;
 }
 
-// Load webhooks from storage
-function loadWebhooks() {
-    const webhooksFile = path.join(process.cwd(), 'data', 'webhooks.json');
-    try {
-        if (fs.existsSync(webhooksFile)) {
-            const data = fs.readFileSync(webhooksFile, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (error) {
-        console.error('Error loading webhooks:', error);
-    }
-    return {};
-}
+const ALGORITHM = 'aes-256-gcm';
 
-function saveWebhooks(webhookStore) {
-    const webhooksFile = path.join(process.cwd(), 'data', 'webhooks.json');
-    try {
-        const dir = path.dirname(webhooksFile);
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        fs.writeFileSync(webhooksFile, JSON.stringify(webhookStore, null, 2));
-    } catch (error) {
-        console.error('Error saving webhooks:', error);
-    }
-}
+// In-memory storage - shared across webhook calls
+let webhookStore = {};
 
 export default async function handler(req, res) {
     const { id } = req.query;
@@ -50,6 +28,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', 'application/json');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -64,12 +43,12 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Load webhooks from storage
-        const webhookStore = loadWebhooks();
-
-        // Find the webhook
+        // Find the webhook in memory
         if (!webhookStore[id]) {
-            return res.status(404).json({ error: 'Webhook not found' });
+            return res.status(404).json({ 
+                error: 'Webhook not found',
+                message: 'This webhook may have expired or been reset'
+            });
         }
 
         const webhookData = webhookStore[id];
@@ -80,9 +59,6 @@ export default async function handler(req, res) {
         // Update usage count
         webhookData.usageCount = (webhookData.usageCount || 0) + 1;
         webhookData.lastUsed = new Date().toISOString();
-        
-        // Save updated data
-        saveWebhooks(webhookStore);
 
         // Forward the request to the original webhook
         const response = await fetch(originalUrl, {
